@@ -290,7 +290,7 @@
 
     function switchMode(mode) { playSound(); currentMode = mode; if (mode !== 'english') shiftState = 0; renderKeyboard(); }
 
-    function playSound() { clickSound.currentTime = 0; clickSound.play(); if (window.navigator.vibrate) window.navigator.vibrate(10); }
+    //function playSound() { clickSound.currentTime = 0; clickSound.play(); if (window.navigator.vibrate) window.navigator.vibrate(10); }
 
     function copyText() {
         if(!display.value) return;
