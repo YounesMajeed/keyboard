@@ -1,0 +1,17 @@
+{
+  "name": "Shina Keyboard",
+  "short_name": "Shina KB",
+  "description": "Dardic Shina language keyboard by Younis Majeed",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2874/2874837.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

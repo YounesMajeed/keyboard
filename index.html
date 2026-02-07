@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#064e3b">
+<meta name="apple-mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Shina Keyboard | Younis Majeed</title>
@@ -140,6 +143,15 @@
 <audio id="click-sound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19v"></audio>
 
 <script>
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Offline Ready!'))
+        .catch(err => console.log('PWA failed', err));
+    });
+  }
+
+
     const display = document.getElementById('display-area');
     const layoutContainer = document.getElementById('keyboard-layout');
     const langLabel = document.getElementById('lang-label');
