@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Shina Keyboard | Younis Majeed</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Cinzel:wght@700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Gurezi Aesthetic Color Palette */
+            --gurez-pine: #064e3b;      /* Deep Forest Green */
+            --gurez-river: #0d9488;     /* Turquoise Water */
+            --gurez-snow: #f8fafc;      /* Pristine Snow */
+            --bg-dark: #020617;
+            --keyboard-bg: rgba(15, 23, 42, 0.98);
+            --key-bg: #1e293b;
+            --accent: #2dd4bf;          /* Vibrant Turquoise */
+            --delete-key: #991b1b;
+            --enter-key: #0d9488;
+            --font-logo: 'Cinzel', serif;
+            --font-tagline: 'Montserrat', sans-serif;
+            --font-urdu: 'Noto Nastaliq Urdu', serif;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
+            background-color: var(--bg-dark);
+            color: var(--gurez-snow);
+        }
+
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+        /* Branding Header */
+        header {
+            padding: 15px 10px 5px 10px;
+            text-align: center;
+            background: linear-gradient(to bottom, var(--gurez-pine), transparent);
+        }
+
+        .logo {
+            font-family: var(--font-logo);
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            color: var(--gurez-snow);
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tagline {
+            font-family: var(--font-tagline);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Top Section with Display Area */
+        .top-section { flex: 1; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        #display-area {
+            flex: 1; width: 100%; background: transparent; border: none;
+            color: white; font-size: 28px; resize: none; outline: none;
+            line-height: 2.3; padding: 10px; box-sizing: border-box;
+            font-family: var(--font-urdu);
+            text-align: right; direction: rtl;
+            caret-color: var(--accent);
+        }
+
+        .controls { display: flex; justify-content: flex-end; padding: 0 10px; }
+        .btn-copy { 
+            background: var(--gurez-river); color: white; border: none; 
+            padding: 6px 15px; border-radius: 20px; font-weight: bold; 
+            font-family: var(--font-tagline); font-size: 10px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Keyboard Container */
+        .keyboard-container {
+            background: var(--keyboard-bg);
+            padding: 10px 4px calc(80px + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(45, 212, 191, 0.2);
+            border-radius: 30px 30px 0 0;
+            direction: ltr !important; 
+        }
+
+        .row { display: flex; justify-content: center; gap: 5px; margin-bottom: 8px; width: 100%; }
+
+        .key {
+            background: var(--key-bg); color: var(--gurez-snow);
+            border: none; height: 52px; flex: 1; border-radius: 8px;
+            font-size: 16px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 2px 0 #000; position: relative; min-width: 0;
+        }
+
+        .shina-font .key { font-family: var(--font-urdu); }
+        .modern-font .key { font-family: var(--font-tagline) !important; font-weight: 500; }
+
+        .key:active { background: var(--accent) !important; color: var(--bg-dark); transform: translateY(1px); }
+        
+        .key.wide { flex: 1.2; }
+        .key.shift-on { background: var(--accent) !important; color: var(--bg-dark); }
+        .key.space { flex: 3.5; background: #0f172a; font-size: 10px; font-family: var(--font-tagline) !important; }
+        .key.delete { background: var(--delete-key) !important; font-size: 20px; }
+        .key.enter { background: var(--enter-key) !important; font-size: 10px; font-weight: bold; font-family: var(--font-tagline) !important; }
+        .key.mode-toggle { background: #334155; font-size: 10px; font-family: var(--font-tagline) !important; }
+
+        .key[data-long]::after { content: '•'; position: absolute; top: 2px; right: 4px; font-size: 11px; color: var(--accent); }
+
+        #toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--bg-dark); padding: 10px 20px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; font-family: var(--font-tagline); font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <header>
+        <h1 class="logo">Shina Keyboard</h1>
+        <p class="tagline">By Younis Majeed — Echoes of the Dardic Voice</p>
+    </header>
+
+    <div class="top-section">
+        <div class="controls">
+            <button class="btn-copy" onclick="copyText()">COPY TEXT</button>
+        </div>
+        <textarea id="display-area" inputmode="none" placeholder="ٹائپ کریں..." autofocus></textarea>
+    </div>
+
+    <div class="keyboard-container" id="kb-container">
+        <div id="keyboard-layout"></div>
+    </div>
+</div>
+
+<div id="toast">TEXT COPIED</div>
+
+<audio id="click-sound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19v"></audio>
+
+<script>
+    const display = document.getElementById('display-area');
+    const layoutContainer = document.getElementById('keyboard-layout');
+    const langLabel = document.getElementById('lang-label');
+    const kbContainer = document.getElementById('kb-container');
+    const clickSound = document.getElementById('click-sound');
+    
+    let currentMode = 'shina';
+    let shiftState = 0; 
+    let longPressTimer;
+    let deleteInterval;
+    let isLongPress = false;
+
+    const longPressMap = {
+        'ا': 'آ', 'ہ': 'ھ', 'ج': 'ج\u0615', 'چ': 'چ\u0615', 'ش': 'ش\u0615', 'ن': 'ن\u0615', 
+        'ت': 'ٹ', 'ک': 'خ', 'د': 'ڈ', 'گ': 'غ', 'ر': 'ڑ', 'ز': 'ذ', 'ط': 'ظ',
+        'ص': 'ض', 'س': 'ث',
+        '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹', '0': '۰'
+    };
+
+    const layouts = {
+        shina: [
+            ['ق', 'و', 'ع', 'ر', 'ت', 'ے', 'ء', 'ی', 'ہ', 'پ'], 
+            ['ا', 'س', 'د', 'ف', 'گ', 'ح', 'ج', 'ک', 'ل', 'ط'],     
+            ['ز', 'ش', 'چ', 'ژ', 'ب', 'ن', 'م', 'ص', '⌫'],     
+            ['123', 'ABC', '◌َ◌ِ', ' ', 'ENTER']
+        ],
+        english: [
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+            ['⇧', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '⌫'],
+            ['123', 'اردو', '◌َ◌ِ', ' ', 'ENTER']
+        ],
+        numeric: [
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['@', '#', '$', '%', '&', '-', '+', '(', ')', '/'],
+            ['<', '>', '*', '"', "'", 'ٛ', '!', '?', '⌫'],
+            ['ABC', 'اردو', '◌َ◌ِ', ' ', 'ENTER']
+        ],
+        aerab: [
+            ['\u064E', '\u0650', '\u064F', '\u064B', '\u064D', '\u064C', '\u0651', '\u0652'],
+            ['\u0670', '\u0656', '\u0657', '\u0654', '\u0655', '\u0615', '\u065A', '\u065B'],
+            ['.', ',', '!', '?', '(', ')', '[', ']', '⌫'],
+            ['123', 'ABC', 'اردو', ' ', 'ENTER']
+        ]
+    };
+
+    function renderKeyboard() {
+        layoutContainer.innerHTML = '';
+        const rows = layouts[currentMode];
+        const isUrduText = (currentMode !== 'english');
+        display.style.direction = isUrduText ? 'rtl' : 'ltr';
+        display.style.textAlign = isUrduText ? 'right' : 'left';
+        display.style.fontFamily = isUrduText ? 'var(--font-urdu)' : 'var(--font-tagline)';
+
+        kbContainer.className = 'keyboard-container';
+        if (currentMode === 'shina' || currentMode === 'aerab') {
+            kbContainer.classList.add('shina-font');
+            if (currentMode === 'aerab') kbContainer.classList.add('aerab-font');
+        } else {
+            kbContainer.classList.add('modern-font');
+        }
+
+        rows.forEach((row) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row';
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'key';
+                let label = key;
+                if (currentMode === 'english' && key.length === 1 && /[a-z]/.test(key)) {
+                    label = (shiftState > 0) ? key.toUpperCase() : key;
+                }
+                btn.textContent = label;
+
+                if (key === ' ') { btn.textContent = 'SPACE'; btn.classList.add('space'); }
+                if (key === '⌫') { btn.classList.add('wide', 'delete'); }
+                if (key === 'ENTER') { btn.classList.add('wide', 'enter'); }
+                if (['123', 'ABC', 'اردو', '◌َ◌ِ'].includes(key)) { btn.classList.add('mode-toggle'); }
+                if (key === '⇧') {
+                    btn.classList.add('shift-key');
+                    if (shiftState === 1) btn.classList.add('shift-on');
+                    if (shiftState === 2) btn.classList.add('shift-locked');
+                }
+                
+                if (longPressMap[key]) btn.setAttribute('data-long', longPressMap[key]);
+
+                btn.onmousedown = btn.ontouchstart = (e) => {
+                    e.preventDefault();
+                    isLongPress = false;
+                    if (key === '⌫') {
+                        backspace();
+                        deleteInterval = setTimeout(() => { deleteInterval = setInterval(backspace, 50); }, 500);
+                    } else {
+                        longPressTimer = setTimeout(() => {
+                            if (key === '⇧') { isLongPress = true; shiftState = 2; renderKeyboard(); }
+                            else if (longPressMap[key]) { isLongPress = true; handleInput(longPressMap[key]); }
+                        }, 500);
+                    }
+                };
+
+                btn.onmouseup = btn.ontouchend = (e) => {
+                    clearTimeout(longPressTimer);
+                    clearTimeout(deleteInterval);
+                    clearInterval(deleteInterval);
+                    if (!isLongPress && key !== '⌫') {
+                        if (key === 'ENTER') handleInput('\n');
+                        else if (key === '⇧') handleShift();
+                        else if (key === '123') switchMode('numeric');
+                        else if (key === 'ABC') switchMode('english');
+                        else if (key === 'اردو') switchMode('shina');
+                        else if (key === '◌َ◌ِ') switchMode('aerab');
+                        else {
+                            handleInput(label);
+                            if (currentMode === 'english' && shiftState === 1) { shiftState = 0; renderKeyboard(); }
+                        }
+                    }
+                };
+                rowDiv.appendChild(btn);
+            });
+            layoutContainer.appendChild(rowDiv);
+        });
+    }
+
+    function handleShift() { playSound(); shiftState = (shiftState === 0) ? 1 : 0; renderKeyboard(); }
+
+    function handleInput(char) {
+        playSound();
+        const start = display.selectionStart;
+        const end = display.selectionEnd;
+        display.value = display.value.substring(0, start) + char + display.value.substring(end);
+        display.selectionStart = display.selectionEnd = start + char.length;
+        display.focus();
+    }
+
+    function backspace() {
+        playSound();
+        const start = display.selectionStart;
+        const end = display.selectionEnd;
+        if (start === end && start > 0) {
+            display.value = display.value.substring(0, start - 1) + display.value.substring(end);
+            display.selectionStart = display.selectionEnd = start - 1;
+        } else if (start !== end) {
+            display.value = display.value.substring(0, start) + display.value.substring(end);
+            display.selectionStart = display.selectionEnd = start;
+        }
+        display.focus();
+    }
+
+    function switchMode(mode) { playSound(); currentMode = mode; if (mode !== 'english') shiftState = 0; renderKeyboard(); }
+
+    function playSound() { clickSound.currentTime = 0; clickSound.play(); if (window.navigator.vibrate) window.navigator.vibrate(10); }
+
+    function copyText() {
+        if(!display.value) return;
+        navigator.clipboard.writeText(display.value).then(() => {
+            const t = document.getElementById('toast');
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2000);
+        });
+    }
+
+    renderKeyboard();
+</script>
+
+</body>
+</html>
