@@ -105,7 +105,7 @@ const Keyboard = {
             });
         }
 
-        // Combine and limit to 10
+        // Combine and limit to 15
         const finalMatches = [...startMatches, ...fuzzyMatches].slice(0, 15);
 
         finalMatches.forEach(match => {
@@ -243,7 +243,7 @@ const Keyboard = {
     initServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(e => {});
+                navigator.serviceWorker.register('./service-worker.js').catch(e => {});
             });
         }
     }
