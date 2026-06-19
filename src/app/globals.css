@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Cinzel:wght@700&family=Montserrat:wght@300;500&family=Scheherazade+New:wght@400;700&display=swap');
+
 :root {
     --primary-pine: #064e3b;
     --accent-turquoise: #2dd4bf;
@@ -9,7 +11,7 @@
     --delete-key: #991b1b;
     --font-logo: 'Cinzel', serif;
     --font-tagline: 'Montserrat', sans-serif;
-    --font-urdu: 'Noto Nastaliq Urdu', serif;
+    --font-urdu: 'Scheherazade New', serif;
 }
 
 body, html {
@@ -19,7 +21,17 @@ body, html {
     font-family: var(--font-tagline);
 }
 
-.app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+.app-wrapper { 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    max-width: 480px; 
+    margin: 0 auto; 
+    border-left: 1px solid rgba(45, 212, 191, 0.1);
+    border-right: 1px solid rgba(45, 212, 191, 0.1);
+    background-color: var(--bg-dark);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
 
 header {
     padding: 15px 10px 5px 10px;
@@ -77,6 +89,7 @@ header {
     border: none; height: 52px; flex: 1; border-radius: 8px;
     font-size: 18px; display: flex; align-items: center; justify-content: center;
     position: relative; box-shadow: 0 2px 0 #000; transition: transform 0.05s;
+    user-select: none;
 }
 
 .key:active { background: var(--accent-turquoise) !important; color: var(--bg-dark); transform: translateY(2px); }
@@ -98,4 +111,5 @@ header {
     background: var(--accent-turquoise); color: var(--bg-dark);
     padding: 10px 20px; border-radius: 30px; opacity: 0;
     transition: 0.3s; pointer-events: none; font-weight: bold;
+    z-index: 100;
 }
