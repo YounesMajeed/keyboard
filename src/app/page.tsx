@@ -1,10 +1,60 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+
+// Standard diacritics to strip. We EXCLUDE \u0615 (Retroflex) and \u0653 (Madda) to preserve letter identity.
+const aerabRegex = /[\u064B-\u0652\u0654-\u065F\u0610-\u0614\u0616-\u061A\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g;
+
+const normalize = (text: string) => {
+  if (!text) return "";
+  const n = text.replace(/\u0627\u0653/g, '\u0622');
+  return n.replace(aerabRegex, "").trim();
+};
+
+const getWordAtPosition = (text: string, pos: number) => {
+  if (!text) return { word: "", start: 0 };
+  let lastWhitespace = -1;
+  for (let i = pos - 1; i >= 0; i--) {
+    if (/\s/.test(text[i])) {
+      lastWhitespace = i;
+      break;
+    }
+  }
+  const start = lastWhitespace + 1;
+  const word = text.substring(start, pos);
+  return { word, start };
+};
+
+const isDiacritic = (char: string) => {
+  return /[\u064B-\u065F\u0670\u08FF\u0610-\u061A]/.test(char) && char.length === 1;
+};
+
+const isBelowDiacritic = (char: string) => {
+  return ['\u0650', '\u064D', '\u0655', '\u0656'].includes(char);
+};
+
+const diacriticNames: Record<string, string> = {
+  '\u064E': 'Fatha',
+  '\u0650': 'Kasra',
+  '\u064F': 'Damma',
+  '\u064B': 'Fathatan',
+  '\u064D': 'Kasratan',
+  '\u064C': 'Dammatan',
+  '\u0651': 'Shadda',
+  '\u08FF': 'Sideways Noon Ghunna',
+  '\u0670': 'Superscript Alef',
+  '\u0656': 'Subscript Alef',
+  '\u0657': 'Inverted Damma',
+  '\u0654': 'Hamza Above',
+  '\u0655': 'Hamza Below',
+  '\u0615': 'Small High Tah (Retroflex)',
+  '\u0658': 'Noon Ghunna Above',
+  '\u065B': 'Inverted Damma Vowel Sign'
+};
 
 interface DictionaryItem {
   shina: string;
+  normalizedShina?: string;
   [key: string]: unknown;
 }
 
@@ -16,11 +66,11 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState("TEXT COPIED");
   const [showToast, setShowToast] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deleteCountRef = useRef<number>(0);
   const isLongPressRef = useRef(false);
 
@@ -28,9 +78,6 @@ export default function Home() {
   useEffect(() => {
     displayTextRef.current = displayText;
   }, [displayText]);
-
-  // Standard diacritics to strip. We EXCLUDE \u0615 (Retroflex) and \u0653 (Madda) to preserve letter identity.
-  const aerabRegex = /[\u064B-\u0652\u0654-\u065F\u0610-\u0614\u0616-\u061A\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g;
 
   const longPressMappings: Record<string, string> = {
     'ی': '\u0620', 'ن': '\u06BA', 'ا': 'آ', 'ہ': 'ھ', 'ج': 'ذ',
@@ -70,23 +117,30 @@ export default function Home() {
     // Load dictionary on client mount
     fetch("/dictionary.json")
       .then((res) => res.json())
-      .then((data: DictionaryItem[]) => setDictionary(data))
+      .then((data: DictionaryItem[]) => {
+        const processed = data.map(item => ({
+          ...item,
+          normalizedShina: normalize(item.shina)
+        }));
+        setDictionary(processed);
+      })
       .catch((e) => console.error("Load dictionary failed", e));
   }, []);
 
-  const normalize = (text: string) => {
-    if (!text) return "";
-    const n = text.replace(/\u0627\u0653/g, '\u0622');
-    return n.replace(aerabRegex, "").trim();
-  };
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      if (deleteIntervalRef.current) clearTimeout(deleteIntervalRef.current);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   const updateSuggestions = (text: string, selectionStart: number) => {
     if (!text) {
       setSuggestions([]);
       return;
     }
-    const lastSpace = text.lastIndexOf(' ', selectionStart - 1);
-    const currentWord = text.substring(lastSpace + 1, selectionStart);
+    const { word: currentWord } = getWordAtPosition(text, selectionStart);
 
     if (currentWord.length < 1) {
       setSuggestions([]);
@@ -95,16 +149,16 @@ export default function Home() {
 
     const normalizedInput = normalize(currentWord);
 
-    // 1. Prioritize words that START with the input
+    // 1. Prioritize words that START with the input (using pre-normalized values)
     const startMatches = dictionary.filter(item =>
-      normalize(item.shina).startsWith(normalizedInput)
+      (item.normalizedShina || "").startsWith(normalizedInput)
     );
 
     // 2. If we need more suggestions, find words that CONTAIN the input anywhere
     let fuzzyMatches: DictionaryItem[] = [];
     if (startMatches.length < 10) {
       fuzzyMatches = dictionary.filter(item => {
-        const normWord = normalize(item.shina);
+        const normWord = item.normalizedShina || "";
         return !normWord.startsWith(normalizedInput) && normWord.includes(normalizedInput);
       });
     }
@@ -164,8 +218,8 @@ export default function Home() {
 
     const text = displayTextRef.current;
     const pos = textarea.selectionStart;
-    const lastSpace = text.lastIndexOf(' ', pos - 1);
-    const before = text.substring(0, lastSpace + 1);
+    const { start } = getWordAtPosition(text, pos);
+    const before = text.substring(0, start);
     const after = text.substring(pos);
     const newText = before + word + " " + after;
 
@@ -179,13 +233,44 @@ export default function Home() {
     }, 0);
   };
 
-  const copyText = () => {
-    if (!displayText) return;
-    navigator.clipboard.writeText(displayText).then(() => {
+  const fallbackCopyText = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    textarea.select();
+    try {
+      document.execCommand('copy');
       setToastMessage("TEXT COPIED");
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
-    });
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setShowToast(false), 2000);
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+      setToastMessage("COPY FAILED");
+      setShowToast(true);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setShowToast(false), 2000);
+    }
+    textarea.selectionStart = start;
+    textarea.selectionEnd = end;
+  };
+
+  const copyText = () => {
+    if (!displayText) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(displayText).then(() => {
+        setToastMessage("TEXT COPIED");
+        setShowToast(true);
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setShowToast(false), 2000);
+      }).catch((err) => {
+        console.error("Clipboard copy failed", err);
+        fallbackCopyText();
+      });
+    } else {
+      fallbackCopyText();
+    }
   };
 
   const runDeletion = () => {
@@ -225,7 +310,6 @@ export default function Home() {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     if (deleteIntervalRef.current) {
       clearTimeout(deleteIntervalRef.current);
-      clearInterval(deleteIntervalRef.current);
     }
 
     if (!isLongPressRef.current && key !== '⌫') {
@@ -246,7 +330,7 @@ export default function Home() {
         setCurrentMode('aerab');
         setShiftActive(0);
       } else {
-        insertText(label);
+        insertText(isDiacritic(key) ? key : label);
         if (shiftActive === 1) {
           setShiftActive(0);
         }
@@ -264,29 +348,7 @@ export default function Home() {
           <h1 className="logo">Shina Keyboard</h1>
           <p className="tagline">by Younis Majeed</p>
         </header>
-        <button 
-          className="btn-settings-toggle" 
-          onClick={() => setShowSettings(!showSettings)}
-          aria-label="Settings"
-        >
-          ⚙️
-        </button>
       </div>
-
-      {showSettings && (
-        <div className="settings-overlay">
-          <h2 style={{ fontSize: "12px", margin: "0 0 10px 0", textTransform: "uppercase", letterSpacing: "1px", color: "var(--accent-turquoise)" }}>Settings</h2>
-          <Link href="/about" style={{ textDecoration: "none" }}>
-            <div className="settings-card">
-              <div className="settings-card-content">
-                <h3>About Us</h3>
-                <p>Learn about the Shina Keyboard team & credits.</p>
-              </div>
-              <div className="settings-card-arrow">→</div>
-            </div>
-          </Link>
-        </div>
-      )}
 
       <div className="top-section">
         <div className="controls">
@@ -315,12 +377,21 @@ export default function Home() {
       </div>
 
       <div className={containerClass} id="kb-container">
-        <div id="suggestion-bar" className="suggestion-bar">
+        <div id="suggestion-bar" className="suggestion-bar" role="listbox" aria-label="Word suggestions">
           {suggestions.map((word, idx) => (
             <span
               key={idx}
               className="suggestion-item"
+              role="option"
+              aria-selected={false}
+              tabIndex={0}
               onClick={() => applySuggestion(word)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  applySuggestion(word);
+                }
+              }}
             >
               {word}
             </span>
@@ -335,6 +406,7 @@ export default function Home() {
                 if (currentMode === 'english' && /[a-z]/.test(key)) {
                   label = shiftActive ? key.toUpperCase() : key;
                 }
+                const isKeyDiacritic = isDiacritic(key);
                 const isSpace = key === ' ';
                 const isDelete = key === '⌫';
                 const isEnter = key === 'ENTER';
@@ -347,18 +419,45 @@ export default function Home() {
                 if (isEnter) keyClass += " wide enter";
                 if (isToggle) keyClass += " mode-toggle";
                 if (isShiftOn) keyClass += " shift-on";
+                if (isKeyDiacritic) keyClass += " diacritic";
+
+                let ariaLabel = label;
+                if (isSpace) ariaLabel = "Space";
+                else if (isDelete) ariaLabel = "Backspace";
+                else if (isEnter) ariaLabel = "Enter";
+                else if (key === '⇧') ariaLabel = "Shift";
+                else if (key === '123') ariaLabel = "Switch to numbers and symbols";
+                else if (key === 'ABC') ariaLabel = "Switch to English layout";
+                else if (key === 'اردو') ariaLabel = "Switch to Shina layout";
+                else if (key === '◌َ◌ِ') ariaLabel = "Switch to diacritics layout";
+                else if (isKeyDiacritic) {
+                  ariaLabel = diacriticNames[key] ? `${diacriticNames[key]} diacritic` : "Diacritic";
+                } else if (longPressMappings[key]) {
+                  ariaLabel = `${label}, long press for ${longPressMappings[key]}`;
+                }
+
+                let buttonContent: React.ReactNode = isSpace ? "SPACE" : label;
+                if (isKeyDiacritic) {
+                  const markClass = `diacritic-mark ${isBelowDiacritic(key) ? 'below' : 'above'}`;
+                  buttonContent = (
+                    <span className="diacritic-btn-content">
+                      <span className={markClass}>{"\u200C" + key}</span>
+                    </span>
+                  );
+                }
 
                 return (
                   <button
                     key={keyIdx}
                     className={keyClass}
+                    aria-label={ariaLabel}
                     data-long={longPressMappings[key] || undefined}
                     onMouseDown={(e) => handlePressStart(e, key)}
                     onTouchStart={(e) => handlePressStart(e, key)}
                     onMouseUp={(e) => handlePressEnd(e, key, label)}
                     onTouchEnd={(e) => handlePressEnd(e, key, label)}
                   >
-                    {isSpace ? "SPACE" : label}
+                    {buttonContent}
                   </button>
                 );
               })}
