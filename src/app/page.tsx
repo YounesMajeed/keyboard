@@ -70,7 +70,7 @@ export default function Home() {
 
   const normalize = (text: string) => {
     if (!text) return "";
-    let n = text.replace(/\u0627\u0653/g, '\u0622');
+    const n = text.replace(/\u0627\u0653/g, '\u0622');
     return n.replace(aerabRegex, "").trim();
   };
 
