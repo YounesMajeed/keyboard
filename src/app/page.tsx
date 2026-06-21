@@ -24,6 +24,11 @@ export default function Home() {
   const deleteCountRef = useRef<number>(0);
   const isLongPressRef = useRef(false);
 
+  const displayTextRef = useRef(displayText);
+  useEffect(() => {
+    displayTextRef.current = displayText;
+  }, [displayText]);
+
   // Standard diacritics to strip. We EXCLUDE \u0615 (Retroflex) and \u0653 (Madda) to preserve letter identity.
   const aerabRegex = /[\u064B-\u0652\u0654-\u065F\u0610-\u0614\u0616-\u061A\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g;
 
@@ -114,8 +119,10 @@ export default function Home() {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const newText = displayText.substring(0, start) + char + displayText.substring(end);
+    const currentText = displayTextRef.current;
+    const newText = currentText.substring(0, start) + char + currentText.substring(end);
 
+    displayTextRef.current = newText;
     setDisplayText(newText);
 
     // Schedule caret selection update on next tick
@@ -134,7 +141,9 @@ export default function Home() {
     const end = textarea.selectionEnd;
 
     if (start > 0) {
-      const newText = displayText.substring(0, start - 1) + displayText.substring(end);
+      const currentText = displayTextRef.current;
+      const newText = currentText.substring(0, start - 1) + currentText.substring(end);
+      displayTextRef.current = newText;
       setDisplayText(newText);
 
       setTimeout(() => {
@@ -153,13 +162,14 @@ export default function Home() {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    const text = displayText;
+    const text = displayTextRef.current;
     const pos = textarea.selectionStart;
     const lastSpace = text.lastIndexOf(' ', pos - 1);
     const before = text.substring(0, lastSpace + 1);
     const after = text.substring(pos);
     const newText = before + word + " " + after;
 
+    displayTextRef.current = newText;
     setDisplayText(newText);
     setSuggestions([]);
 
