@@ -21,6 +21,7 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const deleteCountRef = useRef<number>(0);
   const isLongPressRef = useRef(false);
 
   // Standard diacritics to strip. We EXCLUDE \u0615 (Retroflex) and \u0653 (Madda) to preserve letter identity.
@@ -177,6 +178,14 @@ export default function Home() {
     });
   };
 
+  const runDeletion = () => {
+    backspace();
+    deleteCountRef.current += 1;
+    // Slow (150ms) for the first 5 deleted characters, then fast (50ms)
+    const delay = deleteCountRef.current > 5 ? 50 : 150;
+    deleteIntervalRef.current = setTimeout(runDeletion, delay);
+  };
+
   const handlePressStart = (e: React.MouseEvent | React.TouchEvent, key: string) => {
     e.preventDefault();
     isLongPressRef.current = false;
@@ -187,9 +196,8 @@ export default function Home() {
 
     if (key === '⌫') {
       backspace();
-      deleteIntervalRef.current = setTimeout(() => {
-        deleteIntervalRef.current = setInterval(() => backspace(), 50);
-      }, 500);
+      deleteCountRef.current = 0;
+      deleteIntervalRef.current = setTimeout(runDeletion, 500);
     } else {
       longPressTimerRef.current = setTimeout(() => {
         isLongPressRef.current = true;
