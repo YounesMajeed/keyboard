@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 
 interface DictionaryItem {
   shina: string;
@@ -15,6 +16,7 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState("TEXT COPIED");
   const [showToast, setShowToast] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -239,10 +241,34 @@ export default function Home() {
 
   return (
     <div className="app-wrapper">
-      <header>
-        <h1 className="logo">Shina Keyboard</h1>
-        <p className="tagline">by Younis Majeed</p>
-      </header>
+      <div className="header-container">
+        <header>
+          <h1 className="logo">Shina Keyboard</h1>
+          <p className="tagline">by Younis Majeed</p>
+        </header>
+        <button 
+          className="btn-settings-toggle" 
+          onClick={() => setShowSettings(!showSettings)}
+          aria-label="Settings"
+        >
+          ⚙️
+        </button>
+      </div>
+
+      {showSettings && (
+        <div className="settings-overlay">
+          <h2 style={{ fontSize: "12px", margin: "0 0 10px 0", textTransform: "uppercase", letterSpacing: "1px", color: "var(--accent-turquoise)" }}>Settings</h2>
+          <Link href="/about" style={{ textDecoration: "none" }}>
+            <div className="settings-card">
+              <div className="settings-card-content">
+                <h3>About Us</h3>
+                <p>Learn about the Shina Keyboard team & credits.</p>
+              </div>
+              <div className="settings-card-arrow">→</div>
+            </div>
+          </Link>
+        </div>
+      )}
 
       <div className="top-section">
         <div className="controls">

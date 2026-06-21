@@ -113,3 +113,223 @@ header {
     transition: 0.3s; pointer-events: none; font-weight: bold;
     z-index: 100;
 }
+
+/* Settings Drawer & Layout */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px 5px 20px;
+    background: linear-gradient(to bottom, var(--primary-pine), transparent);
+}
+.header-container header {
+    padding: 0;
+    background: none;
+    flex: 1;
+}
+.btn-settings-toggle {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--snow-white);
+    transition: transform 0.3s ease;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-settings-toggle:hover {
+    transform: rotate(45deg);
+    color: var(--accent-turquoise);
+}
+
+.settings-overlay {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(45, 212, 191, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 90;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+
+.settings-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(45, 212, 191, 0.15);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-turquoise);
+    cursor: pointer;
+}
+
+.settings-card-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: var(--snow-white);
+}
+
+.settings-card-content p {
+    margin: 0;
+    font-size: 11px;
+    color: rgba(248, 250, 252, 0.7);
+}
+
+.settings-card-arrow {
+    color: var(--accent-turquoise);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* About Page Styles */
+.about-wrapper {
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    max-width: 480px; 
+    margin: 0 auto; 
+    border-left: 1px solid rgba(45, 212, 191, 0.1);
+    border-right: 1px solid rgba(45, 212, 191, 0.1);
+    background-color: var(--bg-dark);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    overflow-y: auto;
+}
+
+.about-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    background: linear-gradient(to bottom, var(--primary-pine), transparent);
+}
+
+.btn-back {
+    position: absolute;
+    left: 20px;
+    background: rgba(45, 212, 191, 0.15);
+    color: var(--accent-turquoise);
+    border: 1px solid rgba(45, 212, 191, 0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--accent-turquoise);
+    color: var(--bg-dark);
+}
+
+.about-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.about-content h2 {
+    font-size: 1.1rem;
+    margin: 0 0 12px 0;
+    border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+    padding-bottom: 6px;
+    color: var(--accent-turquoise);
+    letter-spacing: 1px;
+}
+
+.team-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.member-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 15px;
+    transition: transform 0.2s;
+}
+
+.member-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(45, 212, 191, 0.2);
+}
+
+.member-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.member-emoji {
+    font-size: 24px;
+    background: rgba(45, 212, 191, 0.1);
+    padding: 6px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.member-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.member-role {
+    font-size: 11px;
+    color: var(--accent-turquoise);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.member-desc {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(248, 250, 252, 0.8);
+    line-height: 1.5;
+}
+
+.credits-card {
+    background: rgba(6, 78, 59, 0.2);
+    border: 1px solid rgba(45, 212, 191, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.credits-card p {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.credits-card p:last-child {
+    margin-bottom: 0;
+}
+
+.credits-footnote {
+    font-size: 10px !important;
+    color: rgba(248, 250, 252, 0.5);
+    text-align: center;
+    margin-top: 15px;
+}
+
