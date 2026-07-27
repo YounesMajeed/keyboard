@@ -97,7 +97,7 @@ export default function Home() {
   }, [noteTitle]);
 
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deleteCountRef = useRef<number>(0);
@@ -123,9 +123,36 @@ export default function Home() {
     }
   }, []);
 
+  // Register Service Worker for PWA (Production only, silently unregisters in development)
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      if (process.env.NODE_ENV === "production") {
+        navigator.serviceWorker.register("/sw.js")
+          .then((reg) => {
+            console.log("Service Worker registered successfully with scope:", reg.scope);
+          })
+          .catch((err) => {
+            console.error("Service Worker registration failed:", err);
+          });
+      } else {
+        // Silently unregister any leftover service workers in development — never reload
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+        if (window.caches) {
+          caches.keys().then((keys) => {
+            keys.forEach((key) => caches.delete(key));
+          });
+        }
+      }
+    }
+  }, []);
+
   // Debounced auto-save notes triggers
   useEffect(() => {
-    if (!currentNoteId && !displayText && !noteTitle) {
+    if (!currentNoteId && !displayText.trim() && !noteTitle.trim()) {
       return;
     }
 
@@ -210,6 +237,12 @@ export default function Home() {
   const deleteNote = (noteId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
 
+    // Clear any pending auto-save before modifying state to prevent race conditions
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
     setNotes(prevNotes => {
       const newNotes = prevNotes.filter(n => n.id !== noteId);
       localStorage.setItem("shina_keyboard_notes", JSON.stringify(newNotes));
@@ -217,9 +250,6 @@ export default function Home() {
     });
 
     if (currentNoteId === noteId) {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
       setCurrentNoteId(null);
       setNoteTitle("");
       setDisplayText("");
@@ -279,7 +309,7 @@ export default function Home() {
   useEffect(() => {
     return () => {
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-      if (deleteIntervalRef.current) clearTimeout(deleteIntervalRef.current);
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
@@ -450,7 +480,7 @@ export default function Home() {
     deleteCountRef.current += 1;
     // Slow (150ms) for the first 5 deleted characters, then fast (50ms)
     const delay = deleteCountRef.current > 5 ? 50 : 150;
-    deleteIntervalRef.current = setTimeout(runDeletion, delay);
+    deleteTimerRef.current = setTimeout(runDeletion, delay);
   };
 
   const handlePressStart = (e: React.MouseEvent | React.TouchEvent, key: string) => {
@@ -464,7 +494,7 @@ export default function Home() {
     if (key === '⌫') {
       backspace();
       deleteCountRef.current = 0;
-      deleteIntervalRef.current = setTimeout(runDeletion, 500);
+      deleteTimerRef.current = setTimeout(runDeletion, 500);
     } else {
       longPressTimerRef.current = setTimeout(() => {
         isLongPressRef.current = true;
@@ -480,8 +510,8 @@ export default function Home() {
   const handlePressEnd = (e: React.MouseEvent | React.TouchEvent, key: string, label: string) => {
     e.preventDefault();
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-    if (deleteIntervalRef.current) {
-      clearTimeout(deleteIntervalRef.current);
+    if (deleteTimerRef.current) {
+      clearTimeout(deleteTimerRef.current);
     }
 
     if (!isLongPressRef.current && key !== '⌫') {
@@ -609,7 +639,7 @@ export default function Home() {
         <div id="suggestion-bar" className="suggestion-bar" role="listbox" aria-label="Word suggestions">
           {suggestions.map((word, idx) => (
             <span
-              key={idx}
+              key={word + idx}
               className="suggestion-item"
               role="option"
               aria-selected={false}

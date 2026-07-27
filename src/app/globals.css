@@ -89,12 +89,9 @@ header {
     padding: 10px;
     box-sizing: border-box;
     font-family: var(--font-urdu);
-    text-align: right;
-    direction: rtl;
     caret-color: var(--accent-turquoise);
 }
 
-/* .btn-copy is replaced by .btn-copy-note */
 
 .keyboard-container {
     background: var(--keyboard-bg);
@@ -228,7 +225,8 @@ header {
     z-index: 100;
 }
 
-/* Settings Drawer & Layout */
+
+/* Header Container Layout */
 .header-container {
     display: flex;
     justify-content: space-between;
@@ -244,78 +242,6 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.btn-settings-toggle {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: var(--snow-white);
-    transition: transform 0.3s ease;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-settings-toggle:hover {
-    transform: rotate(45deg);
-    color: var(--accent-turquoise);
-}
-
-.settings-overlay {
-    position: absolute;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 40px);
-    max-width: 440px;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(45, 212, 191, 0.2);
-    border-radius: 12px;
-    padding: 20px;
-    box-sizing: border-box;
-    z-index: 90;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-}
-
-.settings-card {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(45, 212, 191, 0.15);
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.settings-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-turquoise);
-    cursor: pointer;
-}
-
-.settings-card-content h3 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-    color: var(--snow-white);
-}
-
-.settings-card-content p {
-    margin: 0;
-    font-size: 11px;
-    color: rgba(248, 250, 252, 0.7);
-}
-
-.settings-card-arrow {
-    color: var(--accent-turquoise);
-    font-size: 18px;
-    font-weight: bold;
 }
 
 /* About Page Styles */
