@@ -26,7 +26,7 @@ const getWordAtPosition = (text: string, pos: number) => {
 };
 
 const isDiacritic = (char: string) => {
-  return /[\u064B-\u065F\u0670\u08FF\u0610-\u061A]/.test(char) && char.length === 1;
+  return /[\u064B-\u065F\u0670\u06E1\u08FF\u0610-\u061A]/.test(char) && char.length === 1;
 };
 
 const isBelowDiacritic = (char: string) => {
@@ -41,6 +41,7 @@ const diacriticNames: Record<string, string> = {
   '\u064D': 'Kasratan',
   '\u064C': 'Dammatan',
   '\u0651': 'Shadda',
+  '\u06E1': 'Jazm',
   '\u08FF': 'Sideways Noon Ghunna',
   '\u0670': 'Superscript Alef',
   '\u0656': 'Subscript Alef',
@@ -697,7 +698,8 @@ export default function Home() {
 
                 let buttonContent: React.ReactNode = isSpace ? "SPACE" : label;
                 if (isKeyDiacritic) {
-                  const markClass = `diacritic-mark ${isBelowDiacritic(key) ? 'below' : 'above'}`;
+                  const isJazm = key === '\u06E1';
+                  const markClass = `diacritic-mark ${isBelowDiacritic(key) ? 'below' : 'above'}${isJazm ? ' jazm' : ''}`;
                   buttonContent = (
                     <span className="diacritic-btn-content">
                       <span className={markClass}>{"\u200C" + key}</span>
