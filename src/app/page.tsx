@@ -285,7 +285,7 @@ export default function Home() {
       ['ABC', 'ݜ', '◌ٗ', ' ', 'ENTER']
     ],
     aerab: [
-      ['\u064E', '\u0650', '\u064F', '\u064B', '\u064D', '\u064C', '\u0651', '\u08FF'],
+      ['\u064E', '\u0650', '\u064F', '\u064B', '\u064D', '\u064C', '\u0651', '\u06E1'],
       ['\u0670', '\u0656', '\u0657', '\u0654', '\u0655', '\u0615', '\u0658', '\u065B'],
       ['۔', ',', '!', '؟', '(', ')', '[', ']', '⌫'],
       ['123', 'ABC', 'ݜ', ' ', 'ENTER']
@@ -389,7 +389,7 @@ export default function Home() {
     if (start > 0 || end > start) {
       const deleteStart = start === end ? start - 1 : start;
       const newText = currentText.substring(0, deleteStart) + currentText.substring(end);
-      
+
       if (isTitle) {
         noteTitleRef.current = newText;
         setNoteTitle(newText);
@@ -736,7 +736,7 @@ export default function Home() {
               <h2>Saved Notes</h2>
               <button className="btn-close-drawer" onClick={() => setShowNotesDrawer(false)}>✕</button>
             </div>
-            
+
             <div className="notes-grid">
               {notes.length === 0 ? (
                 <div className="empty-notes-message">
